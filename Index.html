@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<title>Flashcard</title>
+<link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+    
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: #1e1e2f;
+  color: white;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background: linear-gradient(135deg, #0f2f1f, #1b4332, #2d6a4f);
+}
+
+h2 {
+    font-family: 'Pacifico', cursive;
+  font-size: 60px;
+  font-weight: 500;
+
+  color: #b02a2a; /* đỏ trầm, không chói */
+
+  letter-spacing: 1px;
+  text-align: center;
+  margin-bottom: 15px;
+
+  position: relative;
+}
+
+/* Container */
+.container {
+  text-align: center;
+}
+
+/* Card */
+.card {
+  width: 500px;
+  height: 300px;
+  perspective: 1000px;
+  margin: 20px auto;
+  cursor: pointer;
+  transition: transform 0.4s ease, opacity 0.4s ease;
+  
+}
+.card.hide-left {
+  transform: translateX(-50px);
+  opacity: 0;
+}
+.card.hide-right {
+  transform: translateX(50px);
+  opacity: 0;
+}
+.card.show {
+  transform: translateX(0);
+  opacity: 1;
+}
+.inner {
+  width: 100%;
+  height: 100%;
+  transition: transform 0.6s;
+  transform-style: preserve-3d;
+  position: relative;
+  transform-origin: center center;
+}
+
+.card.flip .inner {
+  transform: rotateY(180deg);
+}
+
+.front, .back {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  border-radius: 15px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+  backface-visibility: hidden;
+  box-sizing: border-box;
+}
+
+.front {
+  background: #2a2a40;
+}
+.content {
+  text-align: center;
+}
+#question {
+  font-size: 20px;
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+
+#hint {
+  font-size: 14px;
+  opacity: 0.7;
+  font-style: italic;
+}
+#answer {
+  font-size: 20px;
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+#example {
+  font-size: 14px;
+  color: #333;
+  font-style: italic;
+}
+.back {
+  background: #ffd479;
+  color: black;
+  transform: rotateY(180deg);
+}
+
+/* Buttons */
+.buttons {
+  margin-top: 10px;
+}
+
+button {
+  padding: 10px 20px;
+  margin: 5px;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  background: #ffd479;
+  font-weight: bold;
+}
+
+button:hover {
+  opacity: 0.8;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+  <h2>Flashcard</h2>
+
+  <div class="card" onclick="flipCard()">
+    <div class="inner" id="cardInner">
+      <div class="front" >
+        <div class="content">
+            <div id="question"></div>
+            <div id="hint"></div>
+          </div>
+      </div>
+      <div class="back" >
+        <div class="content">
+      <div id="answer"> </div>
+        <div id="example"></div>
+      </div>
+    </div>
+    </div>
+  </div>
+
+  <div class="buttons">
+    <button onclick="changeCard()">Prev</button>
+    <button onclick="changeCard()">Next</button>
+  </div>
+</div>
+
+<script>
+const flashcards = [
+{ q: "Prioritize (v)", hint: "to decide which of a group of things are the most important so that you can deal with them first.", a: "Đặt lên hàng đầu", ex: "Amuro Tooru always prioritizes Japan's profit." },
+  { q: "Emphasize (v)", hint: "to show that something is very important or worth giving attention to.", a: "Nhấn mạnh", ex: "Gosho Aoyama often nerfs characters that were expected to be outstanding to emphasize Conan's role as the main character." },
+  { q: "Reinforce (v)", hint: "to make something stronger.", a: "Củng cố", ex: "Levi Ackerman reinforces the defense line to protect humanity from Titans." },
+  {q: "Stereotype (n)", hint: "a set idea that people have about what someone or something is like, especially an idea that is wrong.", a: "Định kiến", ex: "Mulan breaks the stereotype that women cannot be strong warriors."},
+  {q: "Session (n)", hint: "a formal meeting or series of meetings of an organization such as a parliament or a court of law.", a: "Buổi học, phiên họp", ex: "Hermione Granger spend a long study session preparing for exams."},
+  {q: "Essential (aj)", hint: "necessary or needed.", a: "Thiết yếu", ex: "Sherlock Holmes considers observations essential for solving crimes."},
+  {q: "Empathy (n)", hint: "the ability to share someone else's feelings or experiences by imagining what it would be like to be in that person's situation.", a: "Sự thấu cảm", ex: "Tanjiro Kamado shows empathy toward demons despite their past."},
+  {q: "Expert (aj)", hint: "having or showing a lot of knowledge or skill.", a: "Có chuyên môn", ex: "Sherlock Holmes is an expert detective in solving complex cases."},
+  {q: "Desire (v)", hint: "to want something, especially strongly.", a: "Mong muốn", ex: "Sasuke Uchiha desires of revenge for his clan"},
+  {q: "Workshop (n)", hint: "a room or building where things are made or repaired using machines and/or tools.", a: "Hội thảo", ex: "Hermione Granger attends a magical workshop to improve her spell skills."}
+];
+
+let current = 0;
+
+function renderCard() {
+  document.getElementById("question").innerText = flashcards[current].q;
+  document.getElementById("hint").innerText = flashcards[current].hint;
+  document.getElementById("answer").innerText = flashcards[current].a;
+  document.getElementById("example").innerText = flashcards[current].ex;
+  document.querySelector(".card").classList.remove("flip");
+}
+
+function flipCard() {
+  document.querySelector(".card").classList.toggle("flip");
+}
+
+
+
+// load đầu
+renderCard();
+function changeCard(direction) {
+  const card = document.querySelector(".card");
+  card.classList.remove("flip");
+  // xác định hướng
+  const hideClass = direction === "next" ? "hide-left" : "hide-right";
+
+  card.classList.add(hideClass);
+
+  setTimeout(() => {
+    // đổi index
+    if (direction === "next") {
+      current = (current + 1) % flashcards.length;
+    } else {
+      current = (current - 1 + flashcards.length) % flashcards.length;
+    }
+
+    renderCard();
+
+    // reset vị trí trước khi hiện lại
+    card.classList.remove(hideClass);
+    card.classList.add("show");
+
+    setTimeout(() => {
+      card.classList.remove("show");
+    }, 400);
+
+  }, 400);
+}
+</script>
+
+</body>
+</html>
